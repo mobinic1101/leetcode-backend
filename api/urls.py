@@ -16,8 +16,8 @@ urlpatterns = [
 	path("sign-up", auth.sign_up, name="sign_up"),
 
     # User-related paths
-    path("users/me/", views.UserDetailView.as_view(), name="user_detail"),
-    path("users/me/problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
+    path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
+    path("users/<int:pk>/problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
     path("users/me/likes/", views.UserLikeProblemView.as_view(), name="user_liked_problems"),
     path("users/me/like/<int:problem_id>/", views.UserLikeProblemView.as_view(), name="user_like_problem"),
 

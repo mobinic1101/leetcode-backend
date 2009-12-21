@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from . import serializers
@@ -12,11 +13,17 @@ class UserDetailView(generics.RetrieveAPIView):
     serializer_class = serializers.UserSerializer
 
     def get_object(self):
-        return self.request.user
+        primary_key = int(self.kwargs.get("pk"))
+        try:
+	        user = models.CustomUser.objects.get(id=primary_key)
+	    except:
+	    	return Response(data={"error": "user does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        return user
 
 
-class UserSolvedProblemsView(APIView):
-    pass  # View to list problems solved by a user
+class UserSolvedProblemsView(generics.ListAPIView):
+	def get_queryset(self):
+		
 
 
 class UserLikeProblemView(APIView):
