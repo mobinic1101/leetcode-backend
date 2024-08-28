@@ -20,6 +20,7 @@ class Problem(models.Model):
     title = models.CharField(max_length=300, unique=True)
     description = models.TextField(null=True, blank=True)
     template = models.TextField(null=True, blank=True)
+    hint = models.CharField(max_length=500, blank=True, null=True)
     topic = models.ForeignKey(to=Topic, on_delete=models.PROTECT, null=True, blank=True)
     likes = models.ManyToManyField(to="CustomUser", related_name="likes")
     difficulty = models.IntegerField(
