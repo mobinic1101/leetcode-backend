@@ -14,7 +14,7 @@ def exists(model, val: dict):
 
 
 @api_view(["POST"])
-@permission_classes(AllowAny)
+@permission_classes([])
 def sign_up(request):
 	data = request.data
 	username = data.get("username")
