@@ -12,7 +12,10 @@ class UserSolvedProblemsView(APIView):
     pass  # View to list problems solved by a user
 
 class UserLikeProblemView(APIView):
-    pass  # View to allow a user to like a problem
+    """
+	responsible for likeing a problem and get the liked problems of a user.
+    """
+    pass
 
 
 # Problem Views

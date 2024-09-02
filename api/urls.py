@@ -10,7 +10,9 @@ urlpatterns = [
     # User-related paths
     path("users/me/", views.UserDetailView.as_view(), name="user_detail"),
     path("users/me/problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
+    path("users/me/likes/", views.UserLikeProblemView.as_view(), name="user_liked_problems"),
     path("users/me/like/<int:problem_id>/", views.UserLikeProblemView.as_view(), name="user_like_problem"),
+
 
     # Problem-related paths
     path("problems/", views.ProblemListView.as_view(), name="problem_list"),  # List all problems
