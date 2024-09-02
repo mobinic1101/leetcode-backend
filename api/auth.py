@@ -36,7 +36,8 @@ def sign_up(request):
 
 	user = CustomUser.objects.create_user(
 		username=username, password=password)
-	token = Token.objects.get_or_create(user=user)
+	token, created = Token.objects.get_or_create(user=user)
+	print(token)
 	return Response(
 			{"token": token.key},
 			status=status.HTTP_201_CREATED)

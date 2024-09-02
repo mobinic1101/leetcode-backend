@@ -1,10 +1,18 @@
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf.global_settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from rest_framework.authtoken.views import obtain_auth_token
-from . import auth, views
+from rest_framework.schemas import get_schema_view
+from rest_framework.permissions import AllowAny
+from . import auth
+from . import views
+
+schema = get_schema_view(permission_classes=[AllowAny])
 
 
 urlpatterns = [
 	path("api-token-auth", obtain_auth_token),
+    path("docs/", schema, name='api-schema'),
 	path("sign-up", auth.sign_up, name="sign_up"),
 
     # User-related paths
@@ -28,4 +36,8 @@ urlpatterns = [
 
     # Test case-related paths
     path("problems/<int:problem_id>/testcases/", views.TestCaseListView.as_view(), name="testcase_list"),  # List all test cases for a specific problem
+
 ]
+
+if DEBUG:
+    urlpatterns += static(prefix=MEDIA_URL, document_root=MEDIA_ROOT)
