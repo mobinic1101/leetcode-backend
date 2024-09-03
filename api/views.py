@@ -19,11 +19,11 @@ class UserDetailView(generics.RetrieveAPIView):
 		except:
 			return Response(data={"error": "user does not exist."}, status=status.HTTP_404_NOT_FOUND)
 		return user
-		
+
 
 class UserSolvedProblemsView(generics.ListAPIView):
 	def get_queryset(self):
-		
+		pass
 
 
 class UserLikeProblemView(APIView):
