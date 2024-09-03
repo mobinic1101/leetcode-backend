@@ -20,7 +20,6 @@ def sign_up(request):
 	username = data.get("username")
 	password = data.get("password")
 
-	# check if username is taken
 	if exists(CustomUser, {"username":username}):
 		return Response(
 			{"error": "this username is already taken."},
