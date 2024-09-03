@@ -9,7 +9,7 @@ from . import models
 
 # User Views
 class UserDetailView(generics.RetrieveAPIView):
-	permission_classes = [IsAuthenticated]
+	permission_classes = [AllowAny]
 	serializer_class = serializers.UserSerializer
 
 	def get_object(self):
