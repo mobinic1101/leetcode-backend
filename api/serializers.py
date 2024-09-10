@@ -33,8 +33,6 @@ class SolvedSerializer(serializers.Serializer):
 	def get_title(self, problem: models.Problem):
 		return problem.title
 
-class LikedSerializer(SolvedSerializer):
-	pass
 
 class ProblemDetailSerializer(serializers.Serializer):
 	likes = serializers.SerializerMethodField(method_name="get_likes")

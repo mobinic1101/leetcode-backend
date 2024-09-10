@@ -100,7 +100,7 @@ class ProblemListView(APIView):
 	permission_classes = [AllowAny]
 	pagination_class = PageNumberPagination()
 	def get(self, request: HttpRequest):
-		problems = self.get_queryset()
+		problems = self.pagination_class.paginate_queryset(self.get_queryset(), request)
 		serializer = serializers.ListProblemSerializer(problems, many=True)
 		return OK(data=serializer.data)
 
