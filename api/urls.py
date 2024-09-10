@@ -12,18 +12,15 @@ schema = get_schema_view(permission_classes=[AllowAny])
 
 
 urlpatterns = [
-	path("api-token-auth", obtain_auth_token),
+	path("api-token-auth/", obtain_auth_token),
     path("docs/", schema, name='api-schema'),
-	path("sign-up", auth.sign_up, name="sign_up"),
+	path("sign-up/", auth.sign_up, name="sign_up"),
 
     # User-related paths
     path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
-    path("users/me/problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
-    path("users/me/like/<int:problem_id>/", views.UserLikeProblemView.as_view(), name="user_like_problem"),
-
+    path("users/me/solved-problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
 
     # Problem-related paths
-    path("problems/<int:pk>/likes/", views.ProblemLikeView.as_view(), name="user_liked_problems"),
     path("problems/", views.ProblemListView.as_view(), name="problem_list"),  # List all problems
     path("problems/<int:pk>/", views.ProblemDetailView.as_view(), name="problem_detail"),  # Retrieve a specific problem
     path("problems/<int:pk>/comments/", views.ProblemCommentView.as_view(), name="problem_comments"),  # Comments on a specific problem

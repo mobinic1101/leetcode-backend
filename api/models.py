@@ -22,7 +22,6 @@ class Problem(models.Model):
     template = models.TextField(null=True, blank=True)
     hint = models.CharField(max_length=500, blank=True, null=True)
     topic = models.ForeignKey(to=Topic, on_delete=models.PROTECT, null=True, blank=True)
-    likes = models.ManyToManyField(to="CustomUser", related_name="likes")
     difficulty = models.IntegerField(
         null=True, default=None, choices=Difficulty.choices
     )
@@ -37,7 +36,8 @@ class CustomUser(AbstractUser):
         default="profile_pics/default.svg",
         null=True,
         blank=True)
-    solved = models.ManyToManyField(to="Problem", blank=True)
+    solved = models.ManyToManyField(to="Problem", blank=True, through="Solved", related_name="solved_problems")
+    solved_count = models.IntegerField(default=0, blank=True)
 
     groups = models.ManyToManyField(
         "auth.Group",
@@ -57,8 +57,21 @@ class CustomUser(AbstractUser):
     def get_image_url(self):
         return self.profile_pic.url
 
+    def add_solved_problem(self, problem: Problem):
+        Solved.objects.create(user=self, problem=problem)
+        self.solved_count += 1
+        self.save()
+
     def __str__(self) -> str:
         return self.username
+
+
+class Solved(models.Model):
+    user = models.ForeignKey(to="CustomUser", on_delete=models.CASCADE, related_name="user")
+    problem = models.ForeignKey(to="Problem", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ["user", "problem"]
 
 
 class Comment(models.Model):

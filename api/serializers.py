@@ -14,14 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ListProblemSerializer(serializers.ModelSerializer):
-	likes = serializers.SerializerMethodField(method_name="get_likes")
-
+	topic = serializers.SerializerMethodField(method_name="get_topic")
 	class Meta:
 		model = models.Problem
 		exclude = ["template", "hint"]
 
-	def get_likes(self, problem):
-		return problem.likes.all().count()
+	def get_topic(self, problem: models.Problem):
+		return problem.topic.topic
 
 
 class SolvedSerializer(serializers.Serializer):
