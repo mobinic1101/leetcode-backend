@@ -9,6 +9,7 @@ from django.http import HttpRequest
 
 from . import serializers
 from . import models
+from .paginations import TopicPagination
 
 
 def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
@@ -17,7 +18,7 @@ def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT
 def BAD_REQUEST(data: dict, status=status.HTTP_400_BAD_REQUEST):
 	return Response(data=data, status=status)
 
-def OK(data, status=status.HTTP_200_OK):
+def OK(data={}, status=status.HTTP_200_OK):
 	return Response(data=data, status=status)
 
 def get_or_404(model: models.models.Model, **kwargs):
@@ -95,12 +96,11 @@ class UserSolvedProblemsView(generics.ListAPIView):
 
 
 # Problem Views
-# I knew i could use generics.ListAPIView here, i just wanted to do it manually.
 class ProblemListView(APIView):
 	permission_classes = [AllowAny]
 	pagination_class = PageNumberPagination()
 	def get(self, request: HttpRequest):
-		problems = self.get_queryset()
+		problems = self.pagination_class.paginate_queryset(self.get_queryset(), request)
 		serializer = serializers.ListProblemSerializer(problems, many=True)
 		return OK(data=serializer.data)
 
@@ -123,34 +123,54 @@ class ProblemListView(APIView):
 		return problems
 
 
-class ProblemDetailView(APIView):
-	pass  # View to retrieve details of a specific problem
+class ProblemDetailView(generics.RetrieveAPIView):
+	serializer_class = serializers.ProblemDetailSerializer
+	permission_classes = [AllowAny]
+
+	def get_object(self):
+		problem = get_or_404(models.Problem, id=self.kwargs.get("pk"))
+		return problem
 
 
-class ProblemCommentView(APIView):
-	pass  # View to handle comments on a problem (GET and POST)
+class ProblemCommentView(generics.ListCreateAPIView):
+	# View to handle comments on a problem (GET and POST)
+	serializer_class = serializers.CommentSerializer
+	pagination_class = PageNumberPagination
 
+	def post(self, request: HttpRequest, pk):
+		comment = request.data.get("comment", "").strip()
+		problem = get_or_404(models.Problem, id=pk)
 
-class ProblemLikeView(APIView):
-	pass # responsible for displaying likes on a specific problem.
+		if not comment:
+			return BAD_REQUEST({"error": "comment cannot be empty."})
+		
+		comment = models.Comment.objects.create(
+			comment=comment,
+			problem=problem,
+			user=request.user)
+		return OK()
+	
+	def get_queryset(self):
+		return models.Comment.objects.filter(Q(problem__id=self.kwargs.get("pk")))
+	
+	def get_permissions(self):
+		return [AllowAny()] if self.request.method == "GET" else [IsAuthenticated()]
 
 
 # Topic Views
-class TopicListView(APIView):
-	pass  # View to list all topics
-
-
-class TopicProblemsView(APIView):
-	pass  # View to list problems under a specific topic
-
-
-# Difficulty Views
-class DifficultyProblemsView(APIView):
-	pass  # View to list problems by difficulty
+class TopicListView(generics.ListAPIView):
+	# View to list all topics
+	serializer_class = serializers.TopicSerializer
+	pagination_class = TopicPagination
+	queryset = models.Topic.objects.all()
 
 
 # Test Case Views
-class TestCaseListView(APIView):
-	pass  # View to list test cases for a specific problem
+class TestCaseListView(generics.ListAPIView):
+	# View to list test cases for a specific problem
+	serializer_class = serializers.TestCaseSerializer
 
-
+	def get_queryset(self):
+		problem = get_or_404(model=models.Problem, id=self.kwargs.get("problem_id"))
+		test_cases = models.TestCase.objects.filter(problem=problem)
+		return test_cases
