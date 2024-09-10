@@ -21,7 +21,6 @@ urlpatterns = [
     path("users/me/solved-problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
 
     # Problem-related paths
-    path("problems/<int:pk>/likes/", views.ProblemLikeView.as_view(), name="problem_likes"),
     path("problems/", views.ProblemListView.as_view(), name="problem_list"),  # List all problems
     path("problems/<int:pk>/", views.ProblemDetailView.as_view(), name="problem_detail"),  # Retrieve a specific problem
     path("problems/<int:pk>/comments/", views.ProblemCommentView.as_view(), name="problem_comments"),  # Comments on a specific problem

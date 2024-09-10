@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from django.http import HttpRequest
+from django.db.models import Q
+from django.http import HttpRequest 
 
 from . import serializers
 from . import models
@@ -99,15 +100,27 @@ class ProblemListView(APIView):
 	permission_classes = [AllowAny]
 	pagination_class = PageNumberPagination()
 	def get(self, request: HttpRequest):
-		query_params = request.query_params
-		print(query_params)
-		return OK({})
+		problems = self.get_queryset()
+		serializer = serializers.ListProblemSerializer(problems, many=True)
+		return OK(data=serializer.data)
 
 	def get_queryset(self):
-		topic = self.request.query_params.get("topic")
-		difficulty = self.request.query_params.get("difficulty")
-		search = self.request.query_params.get("search")
+		topic = self.request.query_params.get("topic", "")
+		difficulty = self.request.query_params.get("difficulty", "")
+		difficulty = difficulty if not difficulty else (
+			int(difficulty) if 0 < int(difficulty) < 4 else difficulty
+		)
+		search = self.request.query_params.get("search", "")
+		print(f"query_string->\ntopic: {topic}\ndifficulty: {difficulty}\nsearch: {search}")
 
+		filter_criteria = Q(topic__topic__icontains=topic)
+		if difficulty:
+			filter_criteria = filter_criteria & Q(difficulty__icontains=difficulty)
+		search_criteria = Q(title__icontains=search) | Q(description__icontains=search)
+		problems = models.Problem.objects.filter(filter_criteria).filter(search_criteria)
+		print(problems)
+
+		return problems
 
 
 class ProblemDetailView(APIView):
