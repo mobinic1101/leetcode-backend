@@ -87,5 +87,5 @@ class Comment(models.Model):
 
 class TestCase(models.Model):
     problem = models.ForeignKey(to=Problem, on_delete=models.CASCADE)
-    input_ = models.TextField(db_column="input", unique=True, blank=True)
+    input = models.TextField(db_column="input", unique=True, blank=True)
     expected = models.TextField(blank=True)

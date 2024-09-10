@@ -57,4 +57,4 @@ class CommentSerializer(serializers.ModelSerializer):
 class TestCaseSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.TestCase
-		exclude = "problem"
+		exclude = ["problem"]

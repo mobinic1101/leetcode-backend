@@ -137,9 +137,9 @@ class ProblemCommentView(generics.ListCreateAPIView):
 	serializer_class = serializers.CommentSerializer
 	pagination_class = PageNumberPagination
 
-	def post(self, request: HttpRequest):
+	def post(self, request: HttpRequest, pk):
 		comment = request.data.get("comment", "").strip()
-		problem = get_or_404(models.Problem, id=self.kwargs.get("pk"))
+		problem = get_or_404(models.Problem, id=pk)
 
 		if not comment:
 			return BAD_REQUEST({"error": "comment cannot be empty."})
@@ -154,7 +154,7 @@ class ProblemCommentView(generics.ListCreateAPIView):
 		return models.Comment.objects.filter(Q(problem__id=self.kwargs.get("pk")))
 	
 	def get_permissions(self):
-		return [AllowAny] if self.request.method == "GET" else [IsAuthenticated]
+		return [AllowAny()] if self.request.method == "GET" else [IsAuthenticated()]
 
 
 # Topic Views
@@ -170,7 +170,7 @@ class TestCaseListView(generics.ListAPIView):
 	# View to list test cases for a specific problem
 	serializer_class = serializers.TestCaseSerializer
 
-	def get_object(self):
+	def get_queryset(self):
 		problem = get_or_404(model=models.Problem, id=self.kwargs.get("problem_id"))
-		test_case = models.TestCase.objects.get(porblem=problem)
-		return test_case
+		test_cases = models.TestCase.objects.filter(problem=problem)
+		return test_cases
