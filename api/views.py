@@ -41,13 +41,13 @@ class UserDetailView(generics.RetrieveAPIView):
 		data = request.data
 		print(f"type: {type(data)} =>", data)
 		serializer = self.serializer_class(instance=obj, data=data)
-		
+
 		# Error checking:
 		fields_to_restrict = ["is_staff", "is_superuser"]
 		for key in fields_to_restrict:
 			if key in data:
 				return BAD_REQUEST({
-					"error":f"cannot modify these properties: {' '.join(fields_to_restrict)}"
+					"error":f"cannot modify these properties: {', '.join(fields_to_restrict)}"
 					})
 		if not serializer.is_valid():
 			return Response(data=serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
