@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 	def get_solved_count(self, user):
 		return user.solved.all().count()
 
+
 class ListProblemSerializer(serializers.ModelSerializer):
 	likes = serializers.SerializerMethodField(method_name="get_likes")
 

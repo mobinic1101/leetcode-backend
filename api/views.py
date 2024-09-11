@@ -6,9 +6,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from . import serializers
 from . import models
 
+def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
+	return Response(data=data, status=status)
 
-DOES_NOT_EXIST = Response(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND)
-BAD_REQUEST = Response(status=status.HTTP_400_BAD_REQUEST)
+def BAD_REQUEST(data: dict, status=status.HTTP_400_BAD_REQUEST):
+	return Response(data=data, status=status)
+
+def OK(data, status=status.HTTP_200_OK):
+	return Response(data=data, status=status)
 
 
 # User Views
@@ -35,8 +40,15 @@ class UserDetailView(generics.RetrieveAPIView):
 		obj = self.get_object(pk)
 		data = request.data
 		print(f"type: {type(data)} =>", data)
-
 		serializer = self.serializer_class(instance=obj, data=data)
+		
+		# Error checking:
+		fields_to_restrict = ["is_staff", "is_superuser"]
+		for key in fields_to_restrict:
+			if key in data:
+				return BAD_REQUEST({
+					"error":f"cannot modify these properties: {' '.join(fields_to_restrict)}"
+					})
 		if not serializer.is_valid():
 			return Response(data=serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 		
