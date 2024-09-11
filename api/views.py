@@ -7,18 +7,58 @@ from . import serializers
 from . import models
 
 
+DOES_NOT_EXIST = Response(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND)
+BAD_REQUEST = Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 # User Views
 class UserDetailView(generics.RetrieveAPIView):
 	permission_classes = [AllowAny]
 	serializer_class = serializers.UserSerializer
+	sensitive_fields = ["email", "last_login", "groups"]
 
-	def get_object(self):
-		primary_key = int(self.kwargs.get("pk"))
+	def get(self, request, pk):
+		obj = self.get_object(pk)
+
+		if isinstance(obj, Response):
+			return obj
+
+		serializer = self.serializer_class(obj)
+
+		data = serializer.data
+		if not request.user.is_authenticated:
+			data = self.filter_sensitive(data)
+		
+		return Response(data=data, status=status.HTTP_200_OK)
+
+	def put(self, request, pk):
+		obj = self.get_object(pk)
+		data = request.data
+		print(f"type: {type(data)} =>", data)
+
+		serializer = self.serializer_class(instance=obj, data=data)
+		if not serializer.is_valid():
+			return Response(data=serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+		
+		serializer.save()
+		return Response(serializer.data, status=status.HTTP_200_OK)
+
+	def get_object(self, pk):
 		try:
-			user = models.CustomUser.objects.get(id=primary_key)
-		except:
-			return Response(data={"error": "user does not exist."}, status=status.HTTP_404_NOT_FOUND)
+			user = models.CustomUser.objects.get(id=pk)
+		except models.CustomUser.DoesNotExist:
+			return DOES_NOT_EXIST
 		return user
+
+	def get_permissions(self):
+		if self.request.method.lower() == 'put':
+			return [IsAuthenticated()]
+		return [AllowAny()]
+
+	def filter_sensitive(self, data: dict):
+		for key in self.sensitive_fields:
+			data.pop(key, None)
+		return data
 
 
 class UserSolvedProblemsView(generics.ListAPIView):

@@ -1,12 +1,13 @@
 from django.urls import path
 from django.conf.urls.static import static
-from django.conf.global_settings import DEBUG, MEDIA_URL, MEDIA_ROOT
+from django.conf import settings
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.schemas import get_schema_view
 from rest_framework.permissions import AllowAny
 from . import auth
 from . import views
 
+DEBUG, MEDIA_URL, MEDIA_ROOT = (settings.DEBUG, settings.MEDIA_URL, settings.MEDIA_ROOT)
 schema = get_schema_view(permission_classes=[AllowAny])
 
 
@@ -39,5 +40,6 @@ urlpatterns = [
 
 ]
 
+print(DEBUG)
 if DEBUG:
     urlpatterns += static(prefix=MEDIA_URL, document_root=MEDIA_ROOT)
