@@ -18,7 +18,7 @@ urlpatterns = [
 
     # User-related paths
     path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
-    path("users/<int:pk>/problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
+    path("users/me/problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
     path("users/me/like/<int:problem_id>/", views.UserLikeProblemView.as_view(), name="user_like_problem"),
 
 
