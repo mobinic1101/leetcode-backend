@@ -20,7 +20,6 @@ def sign_up(request):
 	username = data.get("username")
 	password = data.get("password")
 
-	# check if username is taken
 	if exists(CustomUser, {"username":username}):
 		return Response(
 			{"error": "this username is already taken."},
@@ -36,7 +35,8 @@ def sign_up(request):
 
 	user = CustomUser.objects.create_user(
 		username=username, password=password)
-	token = Token.objects.get_or_create(user=user)
+	token, created = Token.objects.get_or_create(user=user)
+	print(token)
 	return Response(
 			{"token": token.key},
 			status=status.HTTP_201_CREATED)

@@ -63,7 +63,7 @@ class CustomUser(AbstractUser):
 
 class Comment(models.Model):
     comment = models.TextField(blank=True)
-    CustomUser = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
     problem = models.ForeignKey(to=Problem, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
