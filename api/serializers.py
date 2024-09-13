@@ -25,14 +25,14 @@ class ListProblemSerializer(serializers.ModelSerializer):
 
 
 class SolvedSerializer(serializers.Serializer):
-	problem = serializers.SerializerMethodField(method_name="get_basic_problem_details")
+	id_ = serializers.SerializerMethodField(method_name="get__id")
+	title = serializers.SerializerMethodField(method_name="get_title")
 
-	def get_basic_problem_details(self, problem: models.Problem):
-		data = {
-			"id": problem.id,
-			"title": problem.title
-		}
-		return data
+	def get_id(self, problem: models.Problem):
+		return problem.id
+
+	def get_title(self, problem: models.Problem):
+		return problem.title
 
 class LikedSerializer(SolvedSerializer):
 	pass
