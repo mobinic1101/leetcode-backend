@@ -25,7 +25,7 @@ class ListProblemSerializer(serializers.ModelSerializer):
 
 
 class SolvedSerializer(serializers.Serializer):
-	id_ = serializers.SerializerMethodField(method_name="get__id")
+	id_ = serializers.SerializerMethodField(method_name="get_id")
 	title = serializers.SerializerMethodField(method_name="get_title")
 
 	def get_id(self, problem: models.Problem):
