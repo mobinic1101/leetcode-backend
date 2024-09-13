@@ -1,13 +1,6 @@
 from rest_framework import serializers
 from . import models
 
-class SolvedSerializer(serializers.Serializer):
-	user_id = serializers.IntegerField(help_text="foreign key of the user solved the problem.")
-	problem_id = serializers.IntegerField(help_text="foreign key of the problem solved by user.")
-
-class LikedSerializer(serializers.Serializer):
-	user_id = serializers.IntegerField(help_text="foreign key of the user liked the problem.")
-	problem_id = serializers.IntegerField(help_text="foreign key of the problem liked by user.")
 
 class UserSerializer(serializers.ModelSerializer):
 	solved = serializers.SerializerMethodField(method_name="get_solved_count")
@@ -30,11 +23,28 @@ class ListProblemSerializer(serializers.ModelSerializer):
 	def get_likes(self, problem):
 		return problem.likes.all().count()
 
+
+class SolvedSerializer(serializers.Serializer):
+	problem = serializers.SerializerMethodField(method_name="get_basic_problem_details")
+
+	def get_basic_problem_details(self, problem: models.Problem):
+		data = {
+			"id": problem.id,
+			"title": problem.title
+		}
+		return data
+
+class LikedSerializer(SolvedSerializer):
+	pass
+
 class ProblemDetailSerializer(serializers.Serializer):
-	likes = SolvedSerializer(many=True)
+	likes = serializers.SerializerMethodField(method_name="get_likes")
 	class Meta:
 		model = models.Problem
 		fields = '__all__'
+	
+	def get_likes(self, problem):
+		return problem.likes.all().count()
 
 class TopicSerializer(serializers.ModelSerializer):
 	class Meta:

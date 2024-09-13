@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from . import serializers
 from . import models
 
@@ -17,13 +18,14 @@ def OK(data, status=status.HTTP_200_OK):
 
 
 # User Views
-class UserDetailView(generics.RetrieveAPIView):
+class UserDetailView(generics.GenericAPIView):
 	permission_classes = [AllowAny]
 	serializer_class = serializers.UserSerializer
 	sensitive_fields = ["email", "last_login", "groups"]
 
 	def get(self, request, pk):
 		obj = self.get_object(pk)
+		print(obj.solved.all())
 
 		if isinstance(obj, Response):
 			return obj
@@ -74,8 +76,13 @@ class UserDetailView(generics.RetrieveAPIView):
 
 
 class UserSolvedProblemsView(generics.ListAPIView):
+	permission_classes = [IsAuthenticated]
+	serializer_class = serializers.SolvedSerializer
+	pagination_class = PageNumberPagination
+	
 	def get_queryset(self):
-		pass
+		user = self.request.user
+		return user.solved.all()
 
 
 class UserLikeProblemView(APIView):
@@ -98,6 +105,10 @@ class ProblemCommentView(APIView):
 	pass  # View to handle comments on a problem (GET and POST)
 
 
+class ProblemLikeView(APIView):
+	pass # responsible for displaying likes on a specific problem.
+
+
 # Topic Views
 class TopicListView(APIView):
 	pass  # View to list all topics
@@ -115,3 +126,5 @@ class DifficultyProblemsView(APIView):
 # Test Case Views
 class TestCaseListView(APIView):
 	pass  # View to list test cases for a specific problem
+
+
