@@ -4,8 +4,10 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from django.http import HttpRequest
 from . import serializers
 from . import models
+
 
 def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
 	return Response(data=data, status=status)
@@ -16,6 +18,12 @@ def BAD_REQUEST(data: dict, status=status.HTTP_400_BAD_REQUEST):
 def OK(data, status=status.HTTP_200_OK):
 	return Response(data=data, status=status)
 
+def get_or_404(model: models.models.Model, **kwargs):
+	try:
+		obj = model.objects.get(**kwargs)
+	except model.DoesNotExist:
+		return DOES_NOT_EXIST()
+	return obj
 
 # User Views
 class UserDetailView(generics.GenericAPIView):
@@ -25,7 +33,6 @@ class UserDetailView(generics.GenericAPIView):
 
 	def get(self, request, pk):
 		obj = self.get_object(pk)
-		print(obj.solved.all())
 
 		if isinstance(obj, Response):
 			return obj
@@ -87,15 +94,44 @@ class UserSolvedProblemsView(generics.ListAPIView):
 
 class UserLikeProblemView(APIView):
 	"""
-		responsible for liking a problem and get the liked problems of a user.
+		Responsible for liking a problem.
 	"""
-	pass
+	permission_classes = [IsAuthenticated]
+	def post(self, request: HttpRequest, problem_id):
+		user = request.user
+		res = self.get_object(int(problem_id))
+
+		if isinstance(res, Response):
+			return res
+		problem: models.Problem = res
+		print(problem.get_deferred_fields())
+		if problem.likes.filter(id=user.id).exists():
+			return BAD_REQUEST(data={"error": "Can't like twice."})
+		
+		problem.likes.add(user)
+		return Response(
+			data={
+				"message": "Success", "likes": problem.likes.count()},
+			status=status.HTTP_201_CREATED
+			)
+
+
+	def get_object(self, problem_id):
+		return get_or_404(models.Problem, **{"id": problem_id})
 
 
 # Problem Views
+# I knew i could use generics.ListAPIView here, i just wanted to do it manually.
 class ProblemListView(APIView):
-	pass  # View to list all problems
+	permission_classes = [AllowAny]
+	pagination_class = PageNumberPagination()
+	def get(self, request: HttpRequest):
+		query_params = request.query_params
+		print(query_params)
+		return OK({})
 
+	# def validate_query_params(self, params: dict):
+	# 	# models.Problem.get_deferred_fields()
 
 class ProblemDetailView(APIView):
 	pass  # View to retrieve details of a specific problem
