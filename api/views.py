@@ -8,7 +8,6 @@ from django.http import HttpRequest
 
 from . import serializers
 from . import models
-import utils
 
 
 def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
@@ -127,14 +126,13 @@ class UserLikeProblemView(APIView):
 class ProblemListView(APIView):
 	permission_classes = [AllowAny]
 	pagination_class = PageNumberPagination()
-	allowed_query_params = utils.Class(models.Problem).get_class_attribute_names()
 	def get(self, request: HttpRequest):
 		query_params = request.query_params
 		print(query_params)
 		return OK({})
 
 	def validate_query_params(self, params: dict):
-		
+		pass
 
 class ProblemDetailView(APIView):
 	pass  # View to retrieve details of a specific problem
