@@ -10,12 +10,16 @@ class Class:
         self.class_contents = class_.__dict__
         print("class contents:", self.class_contents)
 
-    def extract_attr_names(self):
+    def extract_attr_names(self, ignore=list):
         attrs = []
         class_contents = self.class_contents
         class_contents_copy = class_contents.copy()
         for key in class_contents:
-            if isinstance(class_contents_copy[key], FunctionType) or self.dunder_finder.match(key):
+            if (
+                isinstance(class_contents_copy[key], FunctionType) or /
+                self.dunder_finder.match(key) or /
+                key in ignore
+                ):
                 continue
             attrs.append(key)
         return attrs
