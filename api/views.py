@@ -93,34 +93,6 @@ class UserSolvedProblemsView(generics.ListAPIView):
 		return user.solved.all()
 
 
-class UserLikeProblemView(APIView):
-	"""
-		Responsible for liking a problem.
-	"""
-	permission_classes = [IsAuthenticated]
-	def post(self, request: HttpRequest, problem_id):
-		user = request.user
-		res = self.get_object(int(problem_id))
-
-		if isinstance(res, Response):
-			return res
-		problem: models.Problem = res
-		print(problem.get_deferred_fields())
-		if problem.likes.filter(id=user.id).exists():
-			return BAD_REQUEST(data={"error": "Can't like twice."})
-		
-		problem.likes.add(user)
-		return Response(
-			data={
-				"message": "Success", "likes": problem.likes.count()},
-			status=status.HTTP_201_CREATED
-			)
-
-
-	def get_object(self, problem_id):
-		return get_or_404(models.Problem, **{"id": problem_id})
-
-
 # Problem Views
 # I knew i could use generics.ListAPIView here, i just wanted to do it manually.
 class ProblemListView(APIView):
