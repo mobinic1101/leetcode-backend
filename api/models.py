@@ -30,13 +30,19 @@ class Problem(models.Model):
         return self.title
 
 
+class Solved(models.Model):
+    user = models.ForeignKey(to=User)
+    problem = models.ForeignKey(to=Problem)
+
+
 class CustomUser(AbstractUser):
     profile_pic = models.ImageField(
         upload_to="profile_pics/",
         default="profile_pics/default.svg",
         null=True,
         blank=True)
-    solved = models.ManyToManyField(to="Problem", blank=True)
+    solved = models.ManyToManyField(to="Problem", blank=True, through=Solved)
+    solved_count = models.IntegerField(default=0, blank=True)
 
     groups = models.ManyToManyField(
         "auth.Group",
@@ -55,6 +61,11 @@ class CustomUser(AbstractUser):
 
     def get_image_url(self):
         return self.profile_pic.url
+
+    def add_solved_problem(self, problem: Problem):
+        Solved.objects.create(user=self, problem=problem)
+        self.solved_count += 1
+        self.save()
 
     def __str__(self) -> str:
         return self.username

@@ -131,8 +131,12 @@ class ProblemListView(APIView):
 		print(query_params)
 		return OK({})
 
-	def validate_query_params(self, params: dict):
-		pass
+	def get_queryset(self):
+		topic = self.request.query_params.get("topic")
+		difficulty = self.request.query_params.get("difficulty")
+		search = self.request.query_params.get("search")
+
+
 
 class ProblemDetailView(APIView):
 	pass  # View to retrieve details of a specific problem
