@@ -30,18 +30,13 @@ class Problem(models.Model):
         return self.title
 
 
-class Solved(models.Model):
-    user = models.ForeignKey(to=User)
-    problem = models.ForeignKey(to=Problem)
-
-
 class CustomUser(AbstractUser):
     profile_pic = models.ImageField(
         upload_to="profile_pics/",
         default="profile_pics/default.svg",
         null=True,
         blank=True)
-    solved = models.ManyToManyField(to="Problem", blank=True, through=Solved)
+    solved = models.ManyToManyField(to="Problem", blank=True, through="Solved", related_name="solved_problems")
     solved_count = models.IntegerField(default=0, blank=True)
 
     groups = models.ManyToManyField(
@@ -69,6 +64,14 @@ class CustomUser(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
+
+
+class Solved(models.Model):
+    user = models.ForeignKey(to="CustomUser", on_delete=models.CASCADE, related_name="user")
+    problem = models.ForeignKey(to="Problem", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ["user", "problem"]
 
 
 class Comment(models.Model):

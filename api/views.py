@@ -34,6 +34,7 @@ class UserDetailView(generics.GenericAPIView):
 
 	def get(self, request, pk):
 		obj = self.get_object(pk)
+		print(obj)
 
 		if isinstance(obj, Response):
 			return obj
@@ -49,27 +50,26 @@ class UserDetailView(generics.GenericAPIView):
 	def put(self, request, pk):
 		obj = self.get_object(pk)
 		data = request.data
-		print(f"type: {type(data)} =>", data)
 		serializer = self.serializer_class(instance=obj, data=data)
 
 		# Error checking:
-		fields_to_restrict = ["is_staff", "is_superuser"]
+		fields_to_restrict = ["is_staff", "is_superuser", "solved_count"]
 		for key in fields_to_restrict:
 			if key in data:
 				return BAD_REQUEST({
 					"error":f"cannot modify these properties: {', '.join(fields_to_restrict)}"
 					})
 		if not serializer.is_valid():
-			return Response(data=serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+			return BAD_REQUEST(data=serializer.error_messages)
 		
 		serializer.save()
-		return Response(serializer.data, status=status.HTTP_200_OK)
+		return OK(data=serializer.data)
 
 	def get_object(self, pk):
 		try:
 			user = models.CustomUser.objects.get(id=pk)
 		except models.CustomUser.DoesNotExist:
-			return DOES_NOT_EXIST
+			return Response(data={"error": f"user[{pk}] DoesNotExist"}, status=status.HTTP_404_NOT_FOUND)
 		return user
 
 	def get_permissions(self):

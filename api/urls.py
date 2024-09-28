@@ -12,9 +12,9 @@ schema = get_schema_view(permission_classes=[AllowAny])
 
 
 urlpatterns = [
-	path("api-token-auth", obtain_auth_token),
+	path("api-token-auth/", obtain_auth_token),
     path("docs/", schema, name='api-schema'),
-	path("sign-up", auth.sign_up, name="sign_up"),
+	path("sign-up/", auth.sign_up, name="sign_up"),
 
     # User-related paths
     path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
