@@ -1,16 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from django.http import HttpRequest 
+from asgiref.sync import sync_to_async
 
 from . import serializers
 from . import models
 from .paginations import TopicPagination
-
 
 def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
 	return Response(data=data, status=status)
@@ -20,6 +19,7 @@ def BAD_REQUEST(data: dict, status=status.HTTP_400_BAD_REQUEST):
 
 def OK(data={}, status=status.HTTP_200_OK):
 	return Response(data=data, status=status)
+
 
 def get_or_404(model: models.models.Model, **kwargs):
 	try:
@@ -164,7 +164,6 @@ class TopicListView(generics.ListAPIView):
 	pagination_class = TopicPagination
 	queryset = models.Topic.objects.all()
 
-
 # Test Case Views
 class TestCaseListView(generics.ListAPIView):
 	# View to list test cases for a specific problem
@@ -174,3 +173,11 @@ class TestCaseListView(generics.ListAPIView):
 		problem = get_or_404(model=models.Problem, id=self.kwargs.get("problem_id"))
 		test_cases = models.TestCase.objects.filter(problem=problem)
 		return test_cases
+
+# Code running views
+class CodeRunningView(APIView):
+	# View to handle code running for a specific problem
+	permission_classes = []
+	async def post(self, request: HttpRequest, problem_id):
+		queryset = models.TestCase.objects.filter(problem__id=problem_id)
+
