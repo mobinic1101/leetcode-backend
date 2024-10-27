@@ -1,16 +1,17 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from django.http import HttpRequest 
+from django.conf import settings
+from concurrent.futures import ThreadPoolExecutor
 
 from . import serializers
 from . import models
 from .paginations import TopicPagination
-
+from . import utils
 
 def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
 	return Response(data=data, status=status)
@@ -20,6 +21,7 @@ def BAD_REQUEST(data: dict, status=status.HTTP_400_BAD_REQUEST):
 
 def OK(data={}, status=status.HTTP_200_OK):
 	return Response(data=data, status=status)
+
 
 def get_or_404(model: models.models.Model, **kwargs):
 	try:
@@ -164,7 +166,6 @@ class TopicListView(generics.ListAPIView):
 	pagination_class = TopicPagination
 	queryset = models.Topic.objects.all()
 
-
 # Test Case Views
 class TestCaseListView(generics.ListAPIView):
 	# View to list test cases for a specific problem
@@ -174,3 +175,35 @@ class TestCaseListView(generics.ListAPIView):
 		problem = get_or_404(model=models.Problem, id=self.kwargs.get("problem_id"))
 		test_cases = models.TestCase.objects.filter(problem=problem)
 		return test_cases
+
+# Code running views
+class CodeRunningView(APIView):
+	# View to handle code running for a specific problem
+	permission_classes = []
+	serializer_class = serializers.TestCaseSerializer
+	def post(self, request: HttpRequest, problem_id):
+		problem = get_or_404(model=models.Problem, id=problem_id)
+		allowed_imports = {"allowed_imports": [item.strip for item in problem.allowed_imports.split(",")]}
+		queryset = models.TestCase.objects.filter(problem__id=problem_id)
+		data = self.serializer_class(queryset, many=True).data
+		data = data.update(allowed_imports)
+		# how the data will look like? this is important to know because
+		#   we are gonna use this data in the code runner container.
+		# or later in the container maybe we converted them using json.loads to get the actual dataStructure.
+		print(data)
+		python_file = request.data.get("python_file", "")
+		if not python_file:
+			return BAD_REQUEST({"error": "you didn't uploaded any file, or maybe you named it wrong in request body\n\
+					   the name must be exactly like this-> 'python_file'."})
+
+		utils.start_code_runner_container() # start the container here
+		
+		with ThreadPoolExecutor() as executor:
+			params = {
+				"url":"http://127.0.0.1:{settigns.CODE_RUNNER_PORT}/run-code",
+				"data": data,
+				"files": {"python_file": python_file}
+				}
+			feature = executor.submit(utils.send_post_request, **params)
+			response = feature.result(timeout=settings.CODE_RUNNER_TIMEOUT)
+		return OK(data=response.json())
