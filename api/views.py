@@ -181,7 +181,7 @@ class CodeRunningView(APIView):
 	# View to handle code running for a specific problem
 	permission_classes = []
 	serializer_class = serializers.TestCaseSerializer
-	async def post(self, request: HttpRequest, problem_id):
+	def post(self, request: HttpRequest, problem_id):
 		queryset = models.TestCase.objects.filter(problem__id=problem_id)
 		data = self.serializer_class(queryset, many=True).data
 		# how the data will look like? this is important to know because
