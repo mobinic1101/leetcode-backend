@@ -12,7 +12,7 @@ def start_code_runner_container():
     container = client.containers.run(
         image="code-runner-image",
         detach=True,
-        ports={"5000/tcp": settings.CODE_RUNNER_PORT},
+        ports={f"{settings.CODE_RUNNER_PORT}/tcp": settings.CODE_RUNNER_PORT},
         auto_remove=True,
         name="code-runner-container")
     # !!! warning the above function is not at its final state.

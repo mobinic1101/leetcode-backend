@@ -192,12 +192,14 @@ class CodeRunningView(APIView):
 		if not python_file:
 			return BAD_REQUEST({"error": "you didn't uploaded any file, or maybe you named it wrong in request body\n\
 					   the name must be exactly like this-> 'python_file'."})
-		utils.start_code_runner_container()
+
+		utils.start_code_runner_container() # start the container here
+		
 		with ThreadPoolExecutor() as executor:
 			params = {
 				"url":"http://127.0.0.1:{settigns.CODE_RUNNER_PORT}/run",
 				"data": data,
-				"files": python_file
+				"files": {"python_file": python_file}
 				}
 			feature = executor.submit(utils.send_post_request, **params)
 			response = feature.result(timeout=settings.CODE_RUNNER_TIMEOUT)
