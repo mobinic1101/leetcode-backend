@@ -182,8 +182,11 @@ class CodeRunningView(APIView):
 	permission_classes = []
 	serializer_class = serializers.TestCaseSerializer
 	def post(self, request: HttpRequest, problem_id):
+		problem = get_or_404(model=models.Problem, id=problem_id)
+		allowed_imports = {"allowed_imports": [item.strip for item in problem.allowed_imports.split(",")]}
 		queryset = models.TestCase.objects.filter(problem__id=problem_id)
 		data = self.serializer_class(queryset, many=True).data
+		data = data.update(allowed_imports)
 		# how the data will look like? this is important to know because
 		#   we are gonna use this data in the code runner container.
 		# or later in the container maybe we converted them using json.loads to get the actual dataStructure.
@@ -197,7 +200,7 @@ class CodeRunningView(APIView):
 		
 		with ThreadPoolExecutor() as executor:
 			params = {
-				"url":"http://127.0.0.1:{settigns.CODE_RUNNER_PORT}/run",
+				"url":"http://127.0.0.1:{settigns.CODE_RUNNER_PORT}/run-code",
 				"data": data,
 				"files": {"python_file": python_file}
 				}
