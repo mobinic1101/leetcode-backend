@@ -213,8 +213,9 @@ class CodeRunningView(APIView):
         #   we are gonna use this data in the code runner container.
         # or later in the container maybe we converted them using json.loads to get the actual dataStructure.
 
-        # updating the testcases list retuned by serializer with allowed_imports and convert it to a dict:
+        # updating the testcases list returned by serializer with allowed_imports and convert it to a dict:
         data = {
+            "execution_id": problem_id,
             "allowed_imports": allowed_imports["allowed_imports"],
             "test_cases": data,
         }
