@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import HttpRequest
 from django.conf import settings
 from concurrent.futures import ThreadPoolExecutor
+import uuid
 
 from . import serializers
 from . import models
@@ -215,7 +216,7 @@ class CodeRunningView(APIView):
 
         # updating the testcases list returned by serializer with allowed_imports and convert it to a dict:
         data = {
-            "execution_id": problem_id,
+            "execution_id": uuid.uuid4(),
             "allowed_imports": allowed_imports["allowed_imports"],
             "test_cases": data,
         }
