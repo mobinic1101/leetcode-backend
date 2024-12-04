@@ -216,7 +216,7 @@ class CodeRunningView(APIView):
 
         # updating the testcases list returned by serializer with allowed_imports and convert it to a dict:
         data = {
-            "execution_id": uuid.uuid4(),
+            "execution_id": str(uuid.uuid4()),
             "allowed_imports": allowed_imports["allowed_imports"],
             "test_cases": data,
         }
