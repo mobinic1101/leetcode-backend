@@ -233,7 +233,7 @@ class CodeRunningView(APIView):
 
         with ThreadPoolExecutor() as executor:
             params = {
-                "url": "http://127.0.0.1:{settigns.CODE_RUNNER_PORT}/run-code",
+                "url": "http://{settings.FASTAPI_HOST}:{settings.FASTAPI_PORT}/run-code",
                 "data": data,
                 "files": {"python_file": python_file},
             }
