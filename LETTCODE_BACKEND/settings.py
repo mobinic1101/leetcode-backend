@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -137,5 +138,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "api.CustomUser"
 
-CODE_RUNNER_PORT = 5000
-CODE_RUNNER_TIMEOUT = 5
+# shared settings
+SETTINGS_PATH = "/etc/leetcode_backend.json"
+with open(SETTINGS_PATH, "r") as file:
+    settings_dict = json.load(file)
+
+FASTAPI_HOST = settings_dict.get("fastapi_host", "localhost")
+FASTAPI_PORT = int(settings_dict.get("fastapi_port", 5000))
+REDIS_HOST = settings_dict.get("redis_host", "localhost")
+REDIS_PORT = int(settings_dict.get("redis_port", 6379))
+REDIS_EXPIRE_SEC = int(settings_dict.get("redis_expire_sec", 10))
+RUN_TESTS_TIMEOUT = int(settings_dict.get("run_tests_timeout", 5))
