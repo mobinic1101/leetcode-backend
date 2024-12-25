@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from django.http import HttpRequest
 from django.conf import settings
@@ -11,7 +10,7 @@ import uuid
 
 from . import serializers
 from . import models
-from .paginations import TopicPagination
+from .paginations import TopicPagination, ProblemListViewPagination
 from . import utils
 
 
@@ -100,7 +99,6 @@ class UserDetailView(generics.GenericAPIView):
 class UserSolvedProblemsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.SolvedSerializer
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -110,10 +108,11 @@ class UserSolvedProblemsView(generics.ListAPIView):
 # Problem Views
 class ProblemListView(APIView):
     permission_classes = [AllowAny]
-    pagination_class = PageNumberPagination()
+    pagination_class = ProblemListViewPagination()
 
     def get(self, request: HttpRequest):
-        problems = self.pagination_class.paginate_queryset(self.get_queryset(), request)
+        queryset = self.get_queryset()
+        problems = self.pagination_class.paginate_queryset(queryset, request)
         serializer = serializers.ListProblemSerializer(problems, many=True)
         return OK(data=serializer.data)
 
@@ -137,8 +136,6 @@ class ProblemListView(APIView):
         problems = models.Problem.objects.filter(filter_criteria).filter(
             search_criteria
         )
-        print(problems)
-
         return problems
 
 
@@ -154,7 +151,6 @@ class ProblemDetailView(generics.RetrieveAPIView):
 class ProblemCommentView(generics.ListCreateAPIView):
     # View to handle comments on a problem (GET and POST)
     serializer_class = serializers.CommentSerializer
-    pagination_class = PageNumberPagination
 
     def post(self, request: HttpRequest, pk):
         comment = request.data.get("comment", "").strip()
@@ -202,11 +198,6 @@ class CodeRunningView(APIView):
 
     def post(self, request: HttpRequest, problem_id):
         problem = get_or_404(model=models.Problem, id=problem_id)
-        allowed_imports = {
-            "allowed_imports": [
-                item.strip() for item in problem.allowed_imports.split(",")
-            ]
-        }
         queryset = models.TestCase.objects.filter(problem__id=problem_id)
         data = self.serializer_class(queryset, many=True).data
         print("data before updating with allowed_imports->", data)
@@ -217,7 +208,7 @@ class CodeRunningView(APIView):
         # updating the testcases list returned by serializer with allowed_imports and convert it to a dict:
         data = {
             "execution_id": str(uuid.uuid4()),
-            "allowed_imports": allowed_imports["allowed_imports"],
+            "allowed_imports": problem.allowed_imports,
             "test_cases": data,
         }
         print("data after updating with allowed_imports->", data)
