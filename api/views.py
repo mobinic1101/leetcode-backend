@@ -1,11 +1,13 @@
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q
 from django.http import HttpRequest
 from django.conf import settings
-from concurrent.futures import ThreadPoolExecutor
+from typing import Dict
+import requests
 import uuid
 
 from . import serializers
@@ -195,6 +197,7 @@ class CodeRunningView(APIView):
     # View to handle code running for a specific problem
     permission_classes = []
     serializer_class = serializers.TestCaseSerializer
+    code_runner_url = settings.CODE_RUNNER_BASE_URL + "/run-code"
 
     def post(self, request: HttpRequest, problem_id):
         problem = get_or_404(model=models.Problem, id=problem_id)
@@ -206,10 +209,11 @@ class CodeRunningView(APIView):
         # or later in the container maybe we converted them using json.loads to get the actual dataStructure.
 
         # updating the testcases list returned by serializer with allowed_imports and convert it to a dict:
+        allowed_imports = problem.allowed_imports if problem.allowed_imports else ""
         data = {
             "execution_id": str(uuid.uuid4()),
-            "allowed_imports": problem.allowed_imports,
-            "test_cases": data,
+            "allowed_imports": allowed_imports,
+            "test_cases": str(data),
         }
         print("data after updating with allowed_imports->", data)
 
@@ -217,17 +221,23 @@ class CodeRunningView(APIView):
         if not python_file:
             return BAD_REQUEST(
                 {
-                    "error": "you didn't uploaded any file, or maybe you named it wrong in request body\n\
-                       the name must be exactly like this-> 'python_file'."
+                    "error": "you didn't uploaded any file, or maybe you named it wrong in request body,\
+the name must be exactly like this-> 'python_file'."
                 }
             )
+        result = self.send_post_request(data=data, files={"python_file": python_file})
+        print(f"code_runner_status: ", result.status_code)
+        return OK(data=result.json(), status=result.status_code)
 
-        with ThreadPoolExecutor() as executor:
-            params = {
-                "url": "http://{settings.FASTAPI_HOST}:{settings.FASTAPI_PORT}/run-code",
-                "data": data,
-                "files": {"python_file": python_file},
-            }
-            feature = executor.submit(utils.send_post_request, **params)
-            response = feature.result(timeout=settings.CODE_RUNNER_TIMEOUT)
-        return OK(data=response.json())
+    def send_post_request(self, data: Dict, files: Dict):
+        url = self.code_runner_url
+        response = requests.post(url, data=data, files=files)
+        return response
+
+
+@api_view(["GET"])
+def get_code_running_result(request, execution_id):
+    url = f"{settings.CODE_RUNNER_BASE_URL}/get-result/{execution_id}"
+    result = requests.get(url)
+    print(f"code_running_status: ", result.status_code)
+    return Response(data=result.json(), status=result.status_code)
