@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -57,26 +57,6 @@ class UserDetailView(generics.GenericAPIView):
 
         return Response(data=data, status=status.HTTP_200_OK)
 
-    def put(self, request, pk):
-        obj = self.get_object(pk)
-        data = request.data
-        serializer = self.serializer_class(instance=obj, data=data)
-
-        # Error checking:
-        fields_to_restrict = ["is_staff", "is_superuser", "solved_count"]
-        for key in fields_to_restrict:
-            if key in data:
-                return BAD_REQUEST(
-                    {
-                        "error": f"cannot modify these properties: {', '.join(fields_to_restrict)}"
-                    }
-                )
-        if not serializer.is_valid():
-            return BAD_REQUEST(data=serializer.error_messages)
-
-        serializer.save()
-        return OK(data=serializer.data)
-
     def get_object(self, pk):
         try:
             user = models.CustomUser.objects.get(id=pk)
@@ -87,15 +67,33 @@ class UserDetailView(generics.GenericAPIView):
             )
         return user
 
-    def get_permissions(self):
-        if self.request.method.lower() == "put":
-            return [IsAuthenticated()]
-        return [AllowAny()]
-
     def filter_sensitive(self, data: dict):
         for key in self.sensitive_fields:
             data.pop(key, None)
         return data
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def update_user_detail(request):
+    obj = request.user
+    data = request.data
+    serializer = serializers.UserSerializer(instance=obj, data=data)
+
+    # Error checking:
+    fields_to_restrict = ["is_staff", "is_superuser", "solved_count", "password"]
+    for key in fields_to_restrict:
+        if key in data:
+            return BAD_REQUEST(
+                {
+                    "error": f"cannot modify these properties: {', '.join(fields_to_restrict)}"
+                }
+            )
+    if not serializer.is_valid():
+        return BAD_REQUEST(data=serializer.error_messages)
+
+    serializer.save()
+    return OK(data=serializer.data)
 
 
 class UserSolvedProblemsView(generics.ListAPIView):

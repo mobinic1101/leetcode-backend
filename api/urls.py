@@ -14,6 +14,7 @@ urlpatterns = [
 
     # User-related paths
     path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
+    path("users/me/update/", views.update_user_detail, name="update_user_detail"),
     path("users/me/solved-problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
 
     # Problem-related paths
