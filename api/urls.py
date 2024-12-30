@@ -10,6 +10,7 @@ DEBUG, MEDIA_URL, MEDIA_ROOT = (settings.DEBUG, settings.MEDIA_URL, settings.MED
 urlpatterns = [
 	path("api-token-auth/", obtain_auth_token),
 	path("sign-up/", auth.sign_up, name="sign_up"),
+    path("logout/", auth.logout, name="logout"),
 
     # User-related paths
     path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
