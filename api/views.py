@@ -1,5 +1,9 @@
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    authentication_classes,
+)
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -182,6 +186,7 @@ class TopicListView(generics.ListAPIView):
 # Test Case Views
 class TestCaseListView(generics.ListAPIView):
     # View to list test cases for a specific problem
+    permission_classes = [AllowAny]
     serializer_class = serializers.TestCaseSerializer
 
     def get_queryset(self):
@@ -201,7 +206,6 @@ class CodeRunningView(APIView):
         problem = get_or_404(model=models.Problem, id=problem_id)
         queryset = models.TestCase.objects.filter(problem__id=problem_id)
         data = self.serializer_class(queryset, many=True).data
-        print("data before updating with allowed_imports->", data)
         # how the data will look like? this is important to know because
         #   we are gonna use this data in the code runner container.
         # or later in the container maybe we converted them using json.loads to get the actual dataStructure.
@@ -213,7 +217,6 @@ class CodeRunningView(APIView):
             "allowed_imports": allowed_imports,
             "test_cases": str(data),
         }
-        print("data after updating with allowed_imports->", data)
 
         python_file = request.data.get("python_file", "")
         if not python_file:
@@ -225,7 +228,7 @@ the name must be exactly like this-> 'python_file'."
             )
         result = self.send_post_request(data=data, files={"python_file": python_file})
         print(f"code_runner_status: ", result.status_code)
-        return OK(data=result.json(), status=result.status_code)
+        return Response(data=result.json(), status=result.status_code)
 
     def send_post_request(self, data: Dict, files: Dict):
         url = self.code_runner_url
@@ -234,8 +237,36 @@ the name must be exactly like this-> 'python_file'."
 
 
 @api_view(["GET"])
-def get_code_running_result(request, execution_id):
+@permission_classes([AllowAny])
+def get_code_running_result(request: HttpRequest, problem_id, execution_id):
     url = f"{settings.CODE_RUNNER_BASE_URL}/get-result/{execution_id}"
-    result = requests.get(url)
-    print(f"code_running_status: ", result.status_code)
-    return Response(data=result.json(), status=result.status_code)
+    response = requests.get(url)
+    code_runner_status_code = response.status_code
+    code_runner_result = response.json()
+
+    test_cases = models.TestCase.objects.filter(problem__id=problem_id)
+    test_cases = serializers.TestCaseSerializer(test_cases, many=True).data
+    test_cases = utils.convert_literal(str(test_cases))
+    test_result = code_runner_result.get("test_result")
+    compared_list, all_passed = (
+        utils.check_test_case_pass(test_cases, test_result)
+        if code_runner_status_code == 200
+        else ([], False)
+    )
+
+    if code_runner_status_code == 200 and request.user.is_authenticated and all_passed:
+        user = request.user
+        problem = get_or_404(model=models.Problem, id=problem_id)
+        if problem not in user.solved.all():
+            user.add_solved_problem(problem)
+
+    response_data = {
+        "execution_result": code_runner_result,
+        "testcase_compare_result": compared_list,
+        "all_passed": all_passed,
+    }
+    return Response(data=response_data, status=code_runner_status_code)
+
+
+# example value returned from /get-result:
+# {'execution_id': '123', 'test_result': [{'id': 1, 'output': 3, 'error': None, 'error_message': None}, {'id': 2, 'output': 5, 'error': None, 'error_message': None}]}

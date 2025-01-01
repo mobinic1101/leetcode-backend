@@ -28,7 +28,7 @@ urlpatterns = [
     # Test case-related paths
     path("problems/<int:problem_id>/testcases/", views.TestCaseListView.as_view(), name="testcase_list"),  # List all test cases for a specific problem
     path("problems/<int:problem_id>/run/", views.CodeRunningView.as_view(), name="run_code"),  # Run a code snippet for a specific problem
-    path("problems/get-result/<str:execution_id>/", views.get_code_running_result, name="get_code_running_result"),  # Run a code snippet for a specific problem
+    path("problems/get-result/<int:problem_id>/<str:execution_id>/", views.get_code_running_result, name="get_code_running_result"),  # Run a code snippet for a specific problem
 
 ]
 
