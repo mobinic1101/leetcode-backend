@@ -21,7 +21,7 @@ class Problem(models.Model):
     description = models.TextField(null=True, blank=True)
     template = models.TextField(null=True, blank=True)
     hint = models.CharField(max_length=500, blank=True, null=True)
-    allowed_imports = models.TextField(null=True, blank=True, help_text="comma-separated list of allowed imports")
+    allowed_imports = models.CharField(null=True, blank=True, help_text="comma-separated list of allowed imports")
     topic = models.ForeignKey(to=Topic, on_delete=models.PROTECT, null=True, blank=True)
     difficulty = models.IntegerField(
         null=True, default=None, choices=Difficulty.choices
