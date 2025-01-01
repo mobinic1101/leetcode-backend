@@ -1,0 +1,2 @@
+each problem have to have its own testcase checking method. for example the output of some problems are correct
+but they are not in order like 'tow sum' problem but still should be considered correct.
