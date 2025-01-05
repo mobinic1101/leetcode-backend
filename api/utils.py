@@ -49,6 +49,12 @@ def check_test_case_pass(test_cases: List, test_result: List) -> List:
 
     passed_count = 0
     compared_list = []
+    if not test_result or not test_result:
+        compared_list.append({
+            "test_case": test_cases,
+            "test_result": test_result,
+            "passed": False
+        })
     for testcase, result in zip(test_cases, test_result):
         if testcase.get('expected') == result.get('output'):
             passed_count += 1
