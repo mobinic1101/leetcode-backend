@@ -21,7 +21,12 @@ class Problem(models.Model):
     description = models.TextField(null=True, blank=True)
     template = models.TextField(null=True, blank=True)
     hint = models.CharField(max_length=500, blank=True, null=True)
-    allowed_imports = models.CharField(null=True, blank=True, help_text="comma-separated list of allowed imports")
+    allowed_imports = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text="comma-separated list of allowed imports",
+    )
     topic = models.ForeignKey(to=Topic, on_delete=models.PROTECT, null=True, blank=True)
     difficulty = models.IntegerField(
         null=True, default=None, choices=Difficulty.choices
@@ -36,8 +41,11 @@ class CustomUser(AbstractUser):
         upload_to="profile_pics/",
         default="profile_pics/default.svg",
         null=True,
-        blank=True)
-    solved = models.ManyToManyField(to="Problem", blank=True, through="Solved", related_name="solved_problems")
+        blank=True,
+    )
+    solved = models.ManyToManyField(
+        to="Problem", blank=True, through="Solved", related_name="solved_problems"
+    )
     solved_count = models.IntegerField(default=0, blank=True)
 
     groups = models.ManyToManyField(
@@ -68,7 +76,9 @@ class CustomUser(AbstractUser):
 
 
 class Solved(models.Model):
-    user = models.ForeignKey(to="CustomUser", on_delete=models.CASCADE, related_name="user")
+    user = models.ForeignKey(
+        to="CustomUser", on_delete=models.CASCADE, related_name="user"
+    )
     problem = models.ForeignKey(to="Problem", on_delete=models.CASCADE)
 
     class Meta:
