@@ -77,10 +77,12 @@ class UserDetailView(generics.GenericAPIView):
         return data
 
 
-@api_view(["POST"])
+@api_view(["POST", "GET"])
 @permission_classes([IsAuthenticated])
-def update_user_detail(request):
+def my_detail(request: HttpRequest):
     obj = request.user
+    if request.method == "GET":
+        return Response(data=serializers.UserSerializer(obj).data)
     data = request.data
     serializer = serializers.UserSerializer(instance=obj, data=data)
 
