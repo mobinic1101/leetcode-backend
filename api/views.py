@@ -48,7 +48,7 @@ class UserDetailView(generics.GenericAPIView):
 
     def get(self, request, pk):
         obj = self.get_object(pk)
-        print(obj)
+        # print(obj)
 
         if isinstance(obj, Response):
             return obj
@@ -227,7 +227,7 @@ the name must be exactly like this-> 'python_file'."
                 }
             )
         result = self.send_post_request(data=data, files={"python_file": python_file})
-        print(f"code_runner_status: ", result.status_code)
+        # print(f"code_runner_status: ", result.status_code)
         return Response(data=result.json(), status=result.status_code)
 
     def send_post_request(self, data: Dict, files: Dict):
