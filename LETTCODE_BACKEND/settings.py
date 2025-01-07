@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import json
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -142,7 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "api.CustomUser"
 
 # shared settings
-SETTINGS_PATH = "/etc/leetcode_backend.json"
+SETTINGS_PATH = os.environ.get("LEETCODE_SETTINGS_PATH")
 with open(SETTINGS_PATH, "r") as file:
     settings_dict = json.load(file)
 
