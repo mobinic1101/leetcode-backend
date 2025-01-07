@@ -20,7 +20,7 @@ from .paginations import TopicPagination, ProblemListViewPagination
 from . import utils
 
 
-def DOES_NOT_EXIST(data={"error": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
+def DOES_NOT_EXIST(data={"detail": "does not exist."}, status=status.HTTP_404_NOT_FOUND):
     return Response(data=data, status=status)
 
 
@@ -66,7 +66,7 @@ class UserDetailView(generics.GenericAPIView):
             user = models.CustomUser.objects.get(id=pk)
         except models.CustomUser.DoesNotExist:
             return Response(
-                data={"error": f"user[{pk}] DoesNotExist"},
+                data={"detail": f"user[{pk}] DoesNotExist"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         return user
@@ -92,7 +92,7 @@ def my_detail(request: HttpRequest):
         if key in data:
             return BAD_REQUEST(
                 {
-                    "error": f"cannot modify these properties: {', '.join(fields_to_restrict)}"
+                    "detail": f"cannot modify these properties: {', '.join(fields_to_restrict)}"
                 }
             )
     if not serializer.is_valid():
@@ -163,7 +163,7 @@ class ProblemCommentView(generics.ListCreateAPIView):
         problem = get_or_404(models.Problem, id=pk)
 
         if not comment:
-            return BAD_REQUEST({"error": "comment cannot be empty."})
+            return BAD_REQUEST({"detail": "comment cannot be empty."})
 
         comment = models.Comment.objects.create(
             comment=comment, problem=problem, user=request.user
@@ -224,7 +224,7 @@ class CodeRunningView(APIView):
         if not python_file:
             return BAD_REQUEST(
                 {
-                    "error": "you didn't uploaded any file, or maybe you named it wrong in request body,\
+                    "detail": "you didn't uploaded any file, or maybe you named it wrong in request body,\
 the name must be exactly like this-> 'python_file'."
                 }
             )
