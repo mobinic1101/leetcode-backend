@@ -5,11 +5,10 @@ from .utils import convert_literal
 
 class UserSerializer(serializers.ModelSerializer):
 	def __init__(self, *args, **kwargs):
-		quick_user_fields = kwargs.get("fields", [])
+		quick_user_fields = kwargs.pop("fields", [])
 		
 		# filter fields based on quick_user_fields:
 		if quick_user_fields:
-			kwargs.pop("fields")
 			fields = {key:val for key, val in self.fields.items() if key in quick_user_fields}
 			self.fields = fields
 		super(UserSerializer, self).__init__(*args, **kwargs)
