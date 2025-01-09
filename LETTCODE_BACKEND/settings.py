@@ -53,8 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "api.middleware.custom_middleware.AddIsAuthenticatedToResponse",
-    "api.middleware.custom_middleware.AddQuickUserDetailsToResponse"
+    "api.middleware.custom_middleware.AddIsAuthenticatedToResponse"
 ]
 
 REST_FRAMEWORK = {

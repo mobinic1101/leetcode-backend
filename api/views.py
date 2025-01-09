@@ -80,9 +80,16 @@ class UserDetailView(generics.GenericAPIView):
 @api_view(["POST", "GET"])
 @permission_classes([IsAuthenticated])
 def my_detail(request: HttpRequest):
+    quick_user_fields = ["username", "profile_pic", "solved_count"]
     obj = request.user
     if request.method == "GET":
-        return Response(data=serializers.UserSerializer(obj).data)
+        if request.query_params.get("quick"):
+            data = serializers.UserSerializer(obj, fields=quick_user_fields).data
+        else:
+            data = serializers.UserSerializer(obj).data
+
+        return Response(data=data, status=status.HTTP_200_OK)
+
     data = request.data
     serializer = serializers.UserSerializer(instance=obj, data=data)
 
