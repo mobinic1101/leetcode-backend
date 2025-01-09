@@ -1,7 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
-from django.forms.models import model_to_dict
 from django.http import HttpRequest, HttpResponse
 import json
+from ..serializers import UserSerializer
 
 
 class AddIsAuthenticatedToResponse(MiddlewareMixin):
@@ -24,7 +24,13 @@ class AddQuickUserDetailsToResponse(MiddlewareMixin):
             return response
 
         if request.user.is_authenticated:
+            user = request.user
             data = json.loads(response.content)
             fields = [*filter(lambda field: field not in data, self.QUICK_USER_FIELDS)]
-            data = {**data, **model_to_dict(request.user, fields=fields)}
+            quick_user_detail = UserSerializer(user, fields=fields).data
+            # print("QUICK_USER_DETAIL: ", quick_user_detail)
+            data = {**data, **quick_user_detail}
+            # print("FINAL RESPONSE DATA: ", data)
             response.content = json.dumps(data)
+
+        return response
