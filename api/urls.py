@@ -1,11 +1,8 @@
 from django.urls import path
-from django.conf.urls.static import static
-from django.conf import settings
 from rest_framework.authtoken.views import obtain_auth_token
 from . import auth
 from . import views
 
-DEBUG, MEDIA_URL, MEDIA_ROOT = (settings.DEBUG, settings.MEDIA_URL, settings.MEDIA_ROOT)
 
 urlpatterns = [
 	path("api-token-auth/", obtain_auth_token),
@@ -31,7 +28,3 @@ urlpatterns = [
     path("problems/get-result/<int:problem_id>/<str:execution_id>/", views.get_code_running_result, name="get_code_running_result"),  # Run a code snippet for a specific problem
 
 ]
-
-print(DEBUG)
-if DEBUG:
-    urlpatterns += static(prefix=MEDIA_URL, document_root=MEDIA_ROOT)
