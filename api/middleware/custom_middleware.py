@@ -8,8 +8,8 @@ class AddIsAuthenticatedToResponse(MiddlewareMixin):
     def __call__(self, request: HttpRequest):
         response: HttpResponse = self.get_response(request)
 
-        print(f"RESPONSE CONTENT-TYPE: ", response["Content-Type"])
-        if response["Content-Type"] == "application/json":
+        print(f"RESPONSE CONTENT-TYPE: ", response.get("Content-Type"))
+        if response.get("Content-Type") == "application/json":
             data = json.loads(response.content)
             data["is_authenticated"] = request.user.is_authenticated
             response.content = json.dumps(data)
