@@ -23,7 +23,7 @@ def sign_up(request):
 
     if exists(CustomUser, {"username": username}):
         return Response(
-            {"error": "this username is already taken."},
+            {"detail": "this username is already taken."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
