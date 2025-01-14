@@ -32,7 +32,7 @@ def sign_up(request):
         validate_password(password)
     except ValidationError as e:
         return Response(
-            {"detail": " ".join(e.error_list)}, status=status.HTTP_400_BAD_REQUEST
+            {"detail": " ".join(e.messages)}, status=status.HTTP_400_BAD_REQUEST
         )
 
     user = CustomUser.objects.create_user(username=username, password=password)
