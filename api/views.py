@@ -141,7 +141,7 @@ class ProblemListView(APIView):
         difficulty = (
             difficulty
             if not difficulty
-            else (int(difficulty) if 0 < int(difficulty) < 4 else difficulty)
+            else (int(difficulty) if 0 < int(difficulty) < 4 else "")
         )
         search = self.request.query_params.get("search", "")
         print(
