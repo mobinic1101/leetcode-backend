@@ -126,8 +126,14 @@ class ProblemListView(APIView):
     def get(self, request: HttpRequest):
         queryset = self.get_queryset()
         problems = self.pagination_class.paginate_queryset(queryset, request)
-        serializer = serializers.ListProblemSerializer(problems, many=True)
-        return OK(data=serializer.data)
+        problem_serializer = serializers.ListProblemSerializer(problems, many=True)
+        data = {"problems": problem_serializer.data}
+        if request.query_params.get("with_topics", None):
+            topics = models.Topic.objects.all()
+            topic_serializer = serializers.TopicSerializer(topics, many=True)
+            data.update({"topics": topic_serializer.data})
+
+        return OK(data=data)
 
     def get_queryset(self):
         topic = self.request.query_params.get("topic", "")
@@ -188,7 +194,6 @@ class ProblemCommentView(generics.ListCreateAPIView):
 class TopicListView(generics.ListAPIView):
     # View to list all topics
     serializer_class = serializers.TopicSerializer
-    pagination_class = TopicPagination
     queryset = models.Topic.objects.all()
 
 
