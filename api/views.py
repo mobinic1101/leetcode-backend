@@ -136,7 +136,7 @@ class ProblemListView(APIView):
         return OK(data=data)
 
     def get_queryset(self):
-        topic = self.request.query_params.get("topic", "")
+        topic: list | str = self.request.GET.getlist("topic", '')
         difficulty = self.request.query_params.get("difficulty", "")
         difficulty = (
             difficulty
@@ -148,7 +148,7 @@ class ProblemListView(APIView):
             f"query_string->\ntopic: {topic}\ndifficulty: {difficulty}\nsearch: {search}"
         )
 
-        filter_criteria = Q(topic__topic__icontains=topic)
+        filter_criteria = Q(topic__topic__icontains=topic) if not topic else Q(topic__topic__in=topic)
         if difficulty:
             filter_criteria = filter_criteria & Q(difficulty__icontains=difficulty)
         search_criteria = Q(title__icontains=search) | Q(description__icontains=search)
@@ -193,6 +193,7 @@ class ProblemCommentView(generics.ListCreateAPIView):
 # Topic Views
 class TopicListView(generics.ListAPIView):
     # View to list all topics
+    permission_classes = [AllowAny]
     serializer_class = serializers.TopicSerializer
     queryset = models.Topic.objects.all()
 
