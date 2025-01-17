@@ -136,7 +136,7 @@ class ProblemListView(APIView):
         return OK(data=data)
 
     def get_queryset(self):
-        topic: list | str = self.request.GET.getlist("topic", '')
+        topics: list = self.request.GET.getlist("topic", '')
         difficulty = self.request.query_params.get("difficulty", "")
         difficulty = (
             difficulty
@@ -145,10 +145,10 @@ class ProblemListView(APIView):
         )
         search = self.request.query_params.get("search", "")
         print(
-            f"query_string->\ntopic: {topic}\ndifficulty: {difficulty}\nsearch: {search}"
+            f"query_string->\ntopic: {topics}\ndifficulty: {difficulty}\nsearch: {search}"
         )
 
-        filter_criteria = Q(topic__topic__icontains=topic) if not topic else Q(topic__topic__in=topic)
+        filter_criteria = Q(topic__topic__icontains=topics[0]) if not topics[0] else Q(topic__topic__in=topics)
         if difficulty:
             filter_criteria = filter_criteria & Q(difficulty__icontains=difficulty)
         search_criteria = Q(title__icontains=search) | Q(description__icontains=search)
