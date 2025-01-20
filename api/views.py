@@ -90,7 +90,8 @@ def my_detail(request: HttpRequest):
 
         return Response(data=data, status=status.HTTP_200_OK)
 
-    data = request.data
+    data = {k: v for k, v in request.data.items()}
+    print("request.data: ", data)
     serializer = serializers.UserSerializer(instance=obj, data=data)
 
     # Error checking:
@@ -103,7 +104,9 @@ def my_detail(request: HttpRequest):
                 }
             )
     if not serializer.is_valid():
-        return BAD_REQUEST(data=serializer.error_messages)
+        print("serializer is not valid")
+        print(serializer.errors)
+        return BAD_REQUEST(data=serializer.errors)
 
     serializer.save()
     return OK(data=serializer.data)
