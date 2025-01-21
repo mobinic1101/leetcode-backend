@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q
 from django.http import HttpRequest
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from typing import Dict
 import requests
 import uuid
@@ -92,6 +93,9 @@ def my_detail(request: HttpRequest):
 
     data = {k: v for k, v in request.data.items()}
     print("request.data: ", data)
+    profile_pic: InMemoryUploadedFile = data.get("profile_pic", None)
+    if profile_pic:
+        print(profile_pic.name)
     serializer = serializers.UserSerializer(instance=obj, data=data)
 
     # Error checking:
