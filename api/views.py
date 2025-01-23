@@ -117,12 +117,14 @@ def my_detail(request: HttpRequest):
 
 
 class UserSolvedProblemsView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = serializers.SolvedSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        return user.solved.all()
+        obj = get_or_404(models.CustomUser, id=self.kwargs.get("pk"))
+        if isinstance(obj, Response):
+            return obj
+        return obj.solved.all()
 
 
 # Problem Views

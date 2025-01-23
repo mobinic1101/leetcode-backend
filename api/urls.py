@@ -12,7 +12,7 @@ urlpatterns = [
     # User-related paths
     path("users/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
     path("users/me/", views.my_detail, name="my_detail"),
-    path("users/me/solved-problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
+    path("users/<int:pk>/solved-problems/", views.UserSolvedProblemsView.as_view(), name="user_solved_problems"),
 
     # Problem-related paths
     path("problems/", views.ProblemListView.as_view(), name="problem_list"),  # List all problems
