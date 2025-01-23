@@ -45,6 +45,7 @@ class SolvedSerializer(serializers.Serializer):
     id_ = serializers.SerializerMethodField(method_name="get_id")
     title = serializers.SerializerMethodField(method_name="get_title")
     topic = serializers.SerializerMethodField(method_name="get_topic")
+    description = serializers.SerializerMethodField(method_name="get_desc")
 
     def get_id(self, problem: models.Problem):
         return problem.id
@@ -54,6 +55,9 @@ class SolvedSerializer(serializers.Serializer):
 
     def get_topic(self, problem: models.Problem):
         return problem.topic.topic
+
+    def get_desc(self, problem: models.Problem):
+        return problem.description
 
 
 class TopicSerializer(serializers.ModelSerializer):
