@@ -46,7 +46,7 @@ class CustomUser(AbstractUser):
     solved = models.ManyToManyField(
         to="Problem", blank=True, through="Solved", related_name="solved_problems"
     )
-    solved_count = models.IntegerField(default=0, blank=True)
+    solved_count = models.IntegerField(default=0, blank=True, db_index=True)
 
     groups = models.ManyToManyField(
         "auth.Group",
