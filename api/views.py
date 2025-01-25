@@ -47,7 +47,7 @@ class UserDetailView(generics.GenericAPIView):
     serializer_class = serializers.UserSerializer
     sensitive_fields = ["email", "last_login", "groups"]
 
-    def get(self, request, pk):
+    def get(self, request, pk): # todo: add rank to this view
         obj = self.get_object(pk)
         # print(obj)
 
