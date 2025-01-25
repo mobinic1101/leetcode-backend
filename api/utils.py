@@ -1,3 +1,5 @@
+from django.http import HttpRequest
+from .models import CustomUser
 import ast
 from typing import List
 
@@ -75,3 +77,8 @@ def check_test_case_pass(test_cases: List, test_result: List) -> List:
 
 
 # {'execution_id': '123', 'test_result': [{'id': 1, 'output': 3, 'error': None, 'error_message': None}, {'id': 2, 'output': 5, 'error': None, 'error_message': None}]}
+
+def find_current_rank(request: HttpRequest):
+    user = request.user
+    rank = CustomUser.objects.filter(solved_count__gt=user.solved_count).count() + 1
+    return rank

@@ -89,6 +89,7 @@ def my_detail(request: HttpRequest):
         else:
             data = serializers.UserSerializer(obj).data
 
+        data.update({"rank": utils.find_current_rank(request)})
         return Response(data=data, status=status.HTTP_200_OK)
 
     data = {k: v for k, v in request.data.items()}
@@ -114,6 +115,16 @@ def my_detail(request: HttpRequest):
 
     serializer.save()
     return OK(data=serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def leaderboards(request: HttpRequest):
+    top_100 = models.CustomUser.objects.filter(solved_count__lt=100).order_by("-solved_count")
+    data = serializers.UserSerializer(top_100, many=True).data
+    if request.user.is_authenticated:
+        data.update({"rank": utils.find_current_rank(request)})
+    return OK(data=data)
 
 
 class UserSolvedProblemsView(generics.ListAPIView):
