@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 
 # enums
@@ -64,7 +65,7 @@ class CustomUser(AbstractUser):
     )
 
     def get_image_url(self):
-        return self.profile_pic.url
+        return settings.DRF_HOST + self.profile_pic.url
 
     def add_solved_problem(self, problem: Problem):
         Solved.objects.create(user=self, problem=problem)

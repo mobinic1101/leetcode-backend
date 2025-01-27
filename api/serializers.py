@@ -5,6 +5,7 @@ from . import models
 
 class UserSerializer(serializers.ModelSerializer):
     solved = serializers.SerializerMethodField(method_name="get_solved_count")
+    profile_pic = serializers.SerializerMethodField(method_name="get_profile_pic")
     username = serializers.CharField(
         min_length=5,
         max_length=150,
@@ -28,6 +29,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_solved_count(self, user):
         return user.solved.all().count()
+
+    def get_profile_pic(self, user):
+        return user.get_image_url()
 
 
 class ListProblemSerializer(serializers.ModelSerializer):

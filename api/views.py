@@ -120,8 +120,7 @@ def my_detail(request: HttpRequest):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def leaderboards(request: HttpRequest):
-    fields = ["username", "solved_count", "profile_pic"]
-
+    fields = ["username", "solved_count", "profile_pic", "id"]
     top_100 = models.CustomUser.objects.filter(solved_count__lt=100).order_by("-solved_count")
     data = serializers.UserSerializer(top_100, many=True, fields=fields).data
     return OK(data=data)
