@@ -28,7 +28,7 @@ class Problem(models.Model):
         blank=True,
         help_text="comma-separated list of allowed imports",
     )
-    topic = models.ForeignKey(to=Topic, on_delete=models.PROTECT, null=True, blank=True)
+    topics = models.ManyToManyField(to=Topic, blank=True)
     difficulty = models.IntegerField(
         null=True, default=None, choices=Difficulty.choices
     )

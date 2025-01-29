@@ -3,6 +3,12 @@ from rest_framework import serializers
 from . import models
 
 
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Topic
+        fields = "__all__"
+
+
 class UserSerializer(serializers.ModelSerializer):
     solved = serializers.SerializerMethodField(method_name="get_solved_count")
     profile_pic = serializers.SerializerMethodField(method_name="get_profile_pic")
@@ -35,20 +41,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ListProblemSerializer(serializers.ModelSerializer):
-    topic = serializers.SerializerMethodField(method_name="get_topic")
+    topics = serializers.SerializerMethodField(method_name="get_topics")
 
     class Meta:
         model = models.Problem
         exclude = ["template", "hint"]
 
-    def get_topic(self, problem: models.Problem):
-        return problem.topic.topic
+    def get_topics(self, problem: models.Problem):
+        topics = problem.topics.all()
+        return TopicSerializer(topics, many=True).data
 
 
 class SolvedSerializer(serializers.Serializer):
     id_ = serializers.SerializerMethodField(method_name="get_id")
     title = serializers.SerializerMethodField(method_name="get_title")
-    topic = serializers.SerializerMethodField(method_name="get_topic")
+    topics = serializers.SerializerMethodField(method_name="get_topics")
     description = serializers.SerializerMethodField(method_name="get_desc")
 
     def get_id(self, problem: models.Problem):
@@ -57,25 +64,24 @@ class SolvedSerializer(serializers.Serializer):
     def get_title(self, problem: models.Problem):
         return problem.title
 
-    def get_topic(self, problem: models.Problem):
-        return problem.topic.topic
+    def get_topics(self, problem: models.Problem):
+        topics = problem.topics.all()
+        return TopicSerializer(topics, many=True).data
 
     def get_desc(self, problem: models.Problem):
         return problem.description
 
 
-class TopicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Topic
-        fields = "__all__"
-
-
 class ProblemDetailSerializer(serializers.ModelSerializer):
-    topic = TopicSerializer()
+    topics = serializers.SerializerMethodField(method_name="get_topics")
 
     class Meta:
         model = models.Problem
         fields = "__all__"
+
+    def get_topics(self, problem: models.Problem):
+        topics = problem.topics.all()
+        return TopicSerializer(topics, many=True).data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -90,3 +96,4 @@ class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.TestCase
         exclude = ["problem"]
+

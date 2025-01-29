@@ -156,25 +156,25 @@ class ProblemListView(APIView):
 
     def get_queryset(self):
         topics: list = self.request.GET.getlist("topic", '')
-        difficulty = self.request.query_params.get("difficulty", "")
+        difficulty: str = self.request.query_params.get("difficulty", "")
         difficulty = (
             difficulty
             if not difficulty
-            else (int(difficulty) if 0 < int(difficulty) < 4 else "")
+            else (int(difficulty) if 0 < int(difficulty) < 4 else "") if difficulty.isdigit() else ""
         )
         search = self.request.query_params.get("search", "")
         print(
-            f"query_string->\ntopic: {topics}\ndifficulty: {difficulty}\nsearch: {search}"
+            f"query_string->\ntopics: {topics}\ndifficulty: {difficulty}\nsearch: {search}"
         )
 
-        filter_criteria = Q(topic__topic__icontains=topics[0]) if not topics[0] else Q(topic__topic__in=topics)
+        filter_criteria = Q() if not topics else Q(topics__topic__in=topics)
         if difficulty:
             filter_criteria = filter_criteria & Q(difficulty__icontains=difficulty)
         search_criteria = Q(title__icontains=search) | Q(description__icontains=search)
         problems = models.Problem.objects.filter(filter_criteria).filter(
             search_criteria
         )
-        return problems
+        return problems.distinct()
 
 
 class ProblemDetailView(generics.RetrieveAPIView):
