@@ -10,7 +10,6 @@ class TopicSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    solved = serializers.SerializerMethodField(method_name="get_solved_count")
     profile_pic = serializers.SerializerMethodField(method_name="get_profile_pic")
     username = serializers.CharField(
         min_length=5,
@@ -19,22 +18,19 @@ class UserSerializer(serializers.ModelSerializer):
     )
 
     def __init__(self, *args, **kwargs):
-        quick_user_fields = kwargs.pop("fields", [])
+        fields_include = kwargs.pop("fields", [])
 
         # filter fields based on quick_user_fields:
-        if quick_user_fields:
+        if fields_include:
             fields = {
-                key: val for key, val in self.fields.items() if key in quick_user_fields
+                key: val for key, val in self.fields.items() if key in fields_include
             }
             self.fields = fields
         super(UserSerializer, self).__init__(*args, **kwargs)
 
     class Meta:
         model = models.CustomUser
-        exclude = ["password"]
-
-    def get_solved_count(self, user):
-        return user.solved.all().count()
+        exclude = ["password", "solved"]
 
     def get_profile_pic(self, user):
         return user.get_image_url()

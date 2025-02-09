@@ -45,7 +45,9 @@ def get_or_404(model: models.models.Model, **kwargs):
 class UserDetailView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = serializers.UserSerializer
-    sensitive_fields = ["email", "last_login", "groups"]
+    serializer_fields = [
+        field.name for field in models.CustomUser._meta.get_fields() if field.name not in ["last_login", "email"]
+    ] # fields to get serailized
 
     def get(self, request, pk): # todo: add rank to this view
         obj = self.get_object(pk)
@@ -54,11 +56,10 @@ class UserDetailView(generics.GenericAPIView):
         if isinstance(obj, Response):
             return obj
 
-        serializer = self.serializer_class(obj)
+        # print(self.serializer_fields)
+        serializer = self.serializer_class(obj, fields=self.serializer_fields)
 
         data = serializer.data
-        if not request.user.is_authenticated:
-            data = self.filter_sensitive(data)
 
         return Response(data=data, status=status.HTTP_200_OK)
 
