@@ -141,7 +141,7 @@ class UserSolvedProblemsView(generics.ListAPIView):
 # Problem Views
 class ProblemListView(APIView):
     permission_classes = [AllowAny]
-    pagination_class = ProblemListViewPagination()
+    pagination_class = ProblemListViewPagination
 
     def get(self, request: HttpRequest):
         queryset = self.get_queryset()
