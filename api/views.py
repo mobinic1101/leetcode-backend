@@ -233,7 +233,7 @@ class TestCaseListView(generics.ListAPIView):
 # Code running views
 class CodeRunningView(APIView):
     # View to handle code running for a specific problem
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.TestCaseSerializer
     code_runner_url = settings.CODE_RUNNER_BASE_URL + "/run-code"
 
@@ -272,7 +272,7 @@ the name must be exactly like this-> 'python_file'."
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_code_running_result(request: HttpRequest, problem_id, execution_id):
     url = f"{settings.CODE_RUNNER_BASE_URL}/get-result/{execution_id}"
     response = requests.get(url)
