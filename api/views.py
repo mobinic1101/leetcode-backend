@@ -253,7 +253,7 @@ class CodeRunningView(APIView):
             "test_cases": str(data),
         }
 
-        python_file = request.data.get("python_file", "")
+        python_file: InMemoryUploadedFile = request.data.get("python_file", "")
         if not python_file:
             return BAD_REQUEST(
                 {
@@ -261,6 +261,15 @@ class CodeRunningView(APIView):
 the name must be exactly like this-> 'python_file'."
                 }
             )
+        
+        # limit file size
+        python_file_size = python_file.size
+        print(f"python_file size: {python_file_size}bytes")
+        if python_file_size > settings.PYTHON_FILE_SIZE_LIMIT:
+            return BAD_REQUEST({
+                "detail": f"size limit for uploaded files is {settings.PYTHON_FILE_SIZE_LIMIT}"
+            })
+
         result = self.send_post_request(data=data, files={"python_file": python_file})
         # print(f"code_runner_status: ", result.status_code)
         return Response(data=result.json(), status=result.status_code)

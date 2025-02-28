@@ -182,3 +182,6 @@ REDIS_PORT = int(settings_dict.get("redis_port", 6379))
 REDIS_EXPIRE_SEC = int(settings_dict.get("redis_expire_sec", 10))
 RUN_TESTS_TIMEOUT = int(settings_dict.get("run_tests_timeout", 5))
 CODE_RUNNER_BASE_URL = f"http://{FASTAPI_HOST}:{FASTAPI_PORT}"
+
+
+PYTHON_FILE_SIZE_LIMIT = 5000 # 5kb
